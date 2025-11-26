@@ -71,6 +71,9 @@ def log_rerun_data(
                 # Convert CHW -> HWC when needed
                 if arr.ndim == 3 and arr.shape[0] in (1, 3, 4) and arr.shape[-1] not in (1, 3, 4):
                     arr = np.transpose(arr, (1, 2, 0))
+                # Preserve single-channel grayscale arrays for correct display
+                if arr.ndim == 3 and arr.shape[-1] == 1:
+                    arr = np.squeeze(arr, axis=-1)
                 if arr.ndim == 1:
                     for i, vi in enumerate(arr):
                         rr.log(f"{key}_{i}", rr.Scalars(float(vi)))

@@ -46,13 +46,13 @@ class OpenCVCameraConfig(CameraConfig):
         fps: Requested frames per second for the color stream.
         width: Requested frame width in pixels for the color stream.
         height: Requested frame height in pixels for the color stream.
-        color_mode: Color mode for image output (RGB or BGR). Defaults to RGB.
+        color_mode: Color mode for image output (RGB, BGR, or GRAY). Defaults to RGB.
         rotation: Image rotation setting (0°, 90°, 180°, or 270°). Defaults to no rotation.
         warmup_s: Time reading frames before returning from connect (in seconds)
         fourcc: FOURCC code for video format (e.g., "MJPG", "YUYV", "I420"). Defaults to None (auto-detect).
 
     Note:
-        - Only 3-channel color output (RGB/BGR) is currently supported.
+        - Color output supports 3-channel RGB/BGR or single-channel grayscale (GRAY).
         - FOURCC codes must be 4-character strings (e.g., "MJPG", "YUYV"). Some common FOUCC codes: https://learn.microsoft.com/en-us/windows/win32/medfound/video-fourccs#fourcc-constants
         - Setting FOURCC can help achieve higher frame rates on some cameras.
     """
@@ -64,9 +64,9 @@ class OpenCVCameraConfig(CameraConfig):
     fourcc: str | None = None
 
     def __post_init__(self) -> None:
-        if self.color_mode not in (ColorMode.RGB, ColorMode.BGR):
+        if self.color_mode not in (ColorMode.RGB, ColorMode.BGR, ColorMode.GRAY):
             raise ValueError(
-                f"`color_mode` is expected to be {ColorMode.RGB.value} or {ColorMode.BGR.value}, but {self.color_mode} is provided."
+                f"`color_mode` is expected to be {ColorMode.RGB.value}, {ColorMode.BGR.value}, or {ColorMode.GRAY.value}, but {self.color_mode} is provided."
             )
 
         if self.rotation not in (

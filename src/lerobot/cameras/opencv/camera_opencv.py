@@ -349,7 +349,7 @@ class OpenCVCamera(Camera):
         Args:
             color_mode (Optional[ColorMode]): If specified, overrides the default
                 color mode (`self.color_mode`) for this read operation (e.g.,
-                request RGB even if default is BGR).
+                request RGB even if default is BGR/GRAY).
 
         Returns:
             np.ndarray: The captured frame as a NumPy array in the format
@@ -388,7 +388,7 @@ class OpenCVCamera(Camera):
 
         Args:
             image (np.ndarray): The raw image frame (expected BGR format from OpenCV).
-            color_mode (Optional[ColorMode]): The target color mode (RGB or BGR). If None,
+            color_mode (Optional[ColorMode]): The target color mode (RGB, BGR, or GRAY). If None,
                                              uses the instance's default `self.color_mode`.
 
         Returns:
@@ -401,24 +401,35 @@ class OpenCVCamera(Camera):
         """
         requested_color_mode = self.color_mode if color_mode is None else color_mode
 
-        if requested_color_mode not in (ColorMode.RGB, ColorMode.BGR):
+        if requested_color_mode not in (ColorMode.RGB, ColorMode.BGR, ColorMode.GRAY):
             raise ValueError(
-                f"Invalid color mode '{requested_color_mode}'. Expected {ColorMode.RGB} or {ColorMode.BGR}."
+                f"Invalid color mode '{requested_color_mode}'. Expected {ColorMode.RGB}, {ColorMode.BGR}, or {ColorMode.GRAY}."
             )
 
-        h, w, c = image.shape
+        if image.ndim == 2:
+            h, w = image.shape
+            c = 1
+        else:
+            h, w, c = image.shape
 
         if h != self.capture_height or w != self.capture_width:
             raise RuntimeError(
                 f"{self} frame width={w} or height={h} do not match configured width={self.capture_width} or height={self.capture_height}."
             )
 
-        if c != 3:
-            raise RuntimeError(f"{self} frame channels={c} do not match expected 3 channels (RGB/BGR).")
+        if c not in (1, 3):
+            raise RuntimeError(f"{self} frame channels={c} do not match expected 3 channels (RGB/BGR) or 1 channel (GRAY).")
 
         processed_image = image
         if requested_color_mode == ColorMode.RGB:
-            processed_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            if c == 1:
+                processed_image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+            else:
+                processed_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        elif requested_color_mode == ColorMode.BGR and c == 1:
+            processed_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        elif requested_color_mode == ColorMode.GRAY and c == 3:
+            processed_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         if self.rotation in [cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_90_COUNTERCLOCKWISE, cv2.ROTATE_180]:
             processed_image = cv2.rotate(processed_image, self.rotation)

@@ -41,7 +41,7 @@ class RealSenseCameraConfig(CameraConfig):
         width: Requested frame width in pixels for the color stream.
         height: Requested frame height in pixels for the color stream.
         serial_number_or_name: Unique serial number or human-readable name to identify the camera.
-        color_mode: Color mode for image output (RGB or BGR). Defaults to RGB.
+        color_mode: Color mode for image output (RGB, BGR, or GRAY). Defaults to RGB.
         use_depth: Whether to enable depth stream. Defaults to False.
         rotation: Image rotation setting (0°, 90°, 180°, or 270°). Defaults to no rotation.
         warmup_s: Time reading frames before returning from connect (in seconds)
@@ -60,9 +60,9 @@ class RealSenseCameraConfig(CameraConfig):
     warmup_s: int = 1
 
     def __post_init__(self) -> None:
-        if self.color_mode not in (ColorMode.RGB, ColorMode.BGR):
+        if self.color_mode not in (ColorMode.RGB, ColorMode.BGR, ColorMode.GRAY):
             raise ValueError(
-                f"`color_mode` is expected to be {ColorMode.RGB.value} or {ColorMode.BGR.value}, but {self.color_mode} is provided."
+                f"`color_mode` is expected to be {ColorMode.RGB.value}, {ColorMode.BGR.value}, or {ColorMode.GRAY.value}, but {self.color_mode} is provided."
             )
 
         if self.rotation not in (

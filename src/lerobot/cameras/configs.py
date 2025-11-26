@@ -24,6 +24,7 @@ import draccus  # type: ignore  # TODO: add type stubs for draccus
 class ColorMode(str, Enum):
     RGB = "rgb"
     BGR = "bgr"
+    GRAY = "gray"
 
 
 class Cv2Rotation(int, Enum):
